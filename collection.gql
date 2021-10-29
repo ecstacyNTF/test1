@@ -1,0 +1,54 @@
+query FetchMyObjkts($addresses: [String!], $include_tags: [String!]) {
+      hic_et_nunc_ask(
+        where: {
+          creator_id: { _in: $addresses }
+          status: { _eq: "active" }
+          amount_left: { _gt: 0 }
+        }
+      ) {
+        price
+        creator_id
+        objkt_id
+      }
+      hic_et_nunc_token(
+        where: {
+          creator_id: { _nin: $addresses }
+          token_holders: {
+            quantity: { _gt: 0 }
+            holder_id: { _in: $addresses }
+          }
+        }
+        order_by: { id: desc }
+      ) {
+        id
+        mime
+        creator_id
+        title
+        artifact_uri
+        display_uri
+        description
+        supply
+        token_tags(where: { tag: { tag: { _in: $include_tags } } }) {
+          tag {
+            tag
+          }
+        }
+        swaps(
+          where: {
+            creator_id: { _in: $addresses }
+            status: { _eq: 0 }
+            contract_version: { _neq: "1" }
+          }
+          order_by: { price: asc }
+        ) {
+          price
+          creator_id
+          amount
+          amount_left
+        }
+        token_holders(where: { quantity: { _gt: 0 } }) {
+          holder_id
+          quantity
+        }
+      }
+    }
